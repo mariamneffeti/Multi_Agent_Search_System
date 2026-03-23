@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — Nexus Research</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0c0d10;
+      --surface:  #13151a;
+      --border:   #1e2130;
+      --accent:   #e8d5a3;
+      --accent2:  #7c9ec9;
+      --text:     #d4d8e2;
+      --muted:    #5a6070;
+      --radius:   12px;
+      --font-head: 'DM Serif Display', serif;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'DM Mono', monospace;
+    }
+
+    body { background: var(--bg); color: var(--text); font-family: var(--font-body); min-height: 100vh; }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      height: 58px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .nav-brand { display: flex; align-items: baseline; gap: 10px; }
+    .nav-brand .logo { font-family: var(--font-head); font-size: 22px; color: var(--accent); }
+    .nav-brand .tagline { font-size: 11px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; font-weight: 500; }
+
+    .nav-links { display: flex; gap: 6px; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 13px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      transition: color .2s, background .2s;
+      font-weight: 500;
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); background: var(--border); }
+
+    .container { max-width: 760px; margin: 0 auto; padding: 56px 24px 80px; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero {
+      text-align: center;
+      padding-bottom: 56px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 56px;
+      animation: fadeUp .6s ease both;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 6px 16px;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 28px;
+    }
+
+    .hero h1 {
+      font-family: var(--font-head);
+      font-size: 52px;
+      color: var(--accent);
+      line-height: 1.05;
+      margin-bottom: 18px;
+    }
+
+    .hero h1 em { color: var(--accent2); }
+
+    .hero p {
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.75;
+      max-width: 560px;
+      margin: 0 auto 32px;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #0c0d10;
+      text-decoration: none;
+      padding: 12px 28px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: opacity .2s;
+    }
+    .hero-cta:hover { opacity: .85; }
+
+    /* PIPELINE */
+    .section {
+      margin-bottom: 56px;
+      animation: fadeUp .6s .1s ease both;
+    }
+
+    .section-label {
+      font-size: 10px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent2);
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .section h2 {
+      font-family: var(--font-head);
+      font-size: 30px;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    .section p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.8;
+      margin-bottom: 12px;
+    }
+
+    /* PIPELINE DIAGRAM */
+    .pipeline {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 28px 0;
+    }
+
+    .pipeline-step {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      animation: fadeUp .5s ease both;
+    }
+
+    .pipeline-step:last-child { border-bottom: none; }
+
+    .step-num {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--accent);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step-body h3 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 5px;
+    }
+
+    .step-body p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    /* TECH STACK */
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .stack-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+    }
+
+    .stack-card .stack-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .stack-card .stack-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .stack-tag {
+      display: inline-block;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 10px;
+      font-family: var(--font-mono);
+      color: var(--accent2);
+      padding: 2px 7px;
+      margin-bottom: 8px;
+    }
+
+    /* QUICK START */
+    .code-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin: 16px 0;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.9;
+      overflow-x: auto;
+    }
+
+    .code-block .comment { color: var(--muted); }
+    .code-block .cmd     { color: var(--accent); }
+    .code-block .kw      { color: var(--accent2); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">
+    <span class="logo">Nexus</span>
+    <span class="tagline">Multi-Agent Research</span>
+  </div>
+  <div class="nav-links">
+    <a href="/">Chat</a>
+    <a href="/history">History</a>
+    <a href="/about" class="active">About</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-badge">🔭 Open-source · LangGraph + Groq</div>
+    <h1>Research that thinks<br><em>in parallel</em></h1>
+    <p>Nexus decomposes your question into focused subtasks, dispatches specialist AI agents, critiques the findings for bias, and synthesises a structured report — in seconds.</p>
+    <a href="/" class="hero-cta">Start researching →</a>
+  </div>
+
+  <!-- PIPELINE -->
+  <div class="section">
+    <div class="section-label">Architecture</div>
+    <h2>The five-agent pipeline</h2>
+    <p>Every query flows through a deterministic graph of specialised agents, each with a single responsibility.</p>
+
+    <div class="pipeline">
+      <div class="pipeline-step">
+        <div class="step-num">01</div>
+        <div class="step-body">
+          <h3>Orchestrator</h3>
+          <p>Decomposes your question into 3–5 specific, independently searchable subtasks and writes a research strategy.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-num">02</div>
+        <div class="step-body">
+          <h3>Research Agent(s)</h3>
+          <p>Uses Tavily's web search API to gather sources for each subtask. In parallel mode, one agent per subtask runs concurrently via LangGraph's Send() API.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-num">03</div>
+        <div class="step-body">
+          <h3>Analysis Agent</h3>
+          <p>Synthesises all gathered sources into a coherent analysis — mapping key findings, tradeoffs, areas of consensus, and confidence levels.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-num">04</div>
+        <div class="step-body">
+          <h3>Critique Agent</h3>
+          <p>Reviews the analysis for unsupported claims, missing perspectives, bias, and blind spots. Flags issues for the synthesiser to address.</p>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="step-num">05</div>
+        <div class="step-body">
+          <h3>Synthesiser</h3>
+          <p>Writes the final publication-ready report with an executive summary, numbered findings with citations, tradeoffs, limitations, and a conclusion.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TECH STACK -->
+  <div class="section">
+    <div class="section-label">Tech Stack</div>
+    <h2>Built on open tools</h2>
+    <div class="stack-grid">
+      <div class="stack-card">
+        <div class="stack-tag">LLM runtime</div>
+        <div class="stack-name">Groq + Llama 3.3 70B</div>
+        <div class="stack-desc">Ultra-fast inference via Groq's LPU hardware. Llama 3.3 70B for high-quality reasoning at speed.</div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-tag">Orchestration</div>
+        <div class="stack-name">LangGraph</div>
+        <div class="stack-desc">Typed stateful agent graphs with built-in support for parallel fan-out via the Send() API.</div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-tag">Web search</div>
+        <div class="stack-name">Tavily</div>
+        <div class="stack-desc">Purpose-built search API for AI agents — returns structured results with URLs, titles, and content snippets.</div>
+      </div>
+      <div class="stack-card">
+        <div class="stack-tag">API server</div>
+        <div class="stack-name">FastAPI + SSE</div>
+        <div class="stack-desc">Async Python server with Server-Sent Events for real-time streaming of agent progress to the browser.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUICK START -->
+  <div class="section">
+    <div class="section-label">Setup</div>
+    <h2>Run it yourself</h2>
+    <p>Install dependencies, add your API keys, and launch the server.</p>
+
+    <div class="code-block">
+      <span class="comment"># 1. Install dependencies</span><br>
+      <span class="cmd">pip install -r requirements.txt</span><br><br>
+      <span class="comment"># 2. Copy and fill in API keys</span><br>
+      <span class="cmd">cp .env.example .env</span><br><br>
+      <span class="comment"># 3. Start the web server</span><br>
+      <span class="cmd">uvicorn api:app --reload --port 8000</span><br><br>
+      <span class="comment"># 4. Open in browser</span><br>
+      <span class="kw">http://localhost:8000</span>
+    </div>
+
+    <p>You need a free <strong style="color:var(--text)">Groq API key</strong> from <a href="https://console.groq.com" target="_blank" style="color:var(--accent2)">console.groq.com</a> and a <strong style="color:var(--text)">Tavily API key</strong> from <a href="https://tavily.com" target="_blank" style="color:var(--accent2)">tavily.com</a> (1,000 free searches/month).</p>
+  </div>
+
+</div>
+
+</body>
+</html>
