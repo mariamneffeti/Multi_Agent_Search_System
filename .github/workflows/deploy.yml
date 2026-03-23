@@ -8,7 +8,7 @@ on:
 
 env:
   IMAGE_NAME: nexus-research
-  REGISTRY: ghcr.io               # GitHub Container Registry (free)
+  REGISTRY: ghcr.io
 
 jobs:
   #  1. Test 
@@ -26,16 +26,19 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: pip install --upgrade pip && pip install -r requirements.txt
+
+      - name: Verify key packages installed
+        run: pip show fastapi langchain-groq langgraph uvicorn
 
       - name: Check imports
-        run: |
-          python -c "import agents, graph, parallel_graph, state, tools, api"
+        env:
+          GROQ_API_KEY: dummy
+          TAVILY_API_KEY: dummy
+        run: python -c "import state, tools, graph, parallel_graph, agents, api"
 
       - name: Lint with ruff (non-blocking)
-        run: |
-          pip install ruff
-          ruff check . || true          # warn only — don't fail the build
+        run: pip install ruff && ruff check . || true
 
   #  2. Build & push Docker image 
   build:
@@ -46,7 +49,7 @@ jobs:
 
     permissions:
       contents: read
-      packages: write               # needed to push to ghcr.io
+      packages: write
 
     outputs:
       image_tag: ${{ steps.meta.outputs.tags }}
@@ -90,5 +93,9 @@ jobs:
     steps:
       - name: Trigger Render deploy hook
         run: |
-          curl -fsSL "${{ secrets.RENDER_DEPLOY_HOOK }}" \
-            -X POST || echo "No Render hook configured — skipping."
+          if [ -n "${{ secrets.RENDER_DEPLOY_HOOK }}" ]; then
+            curl -fsSL "${{ secrets.RENDER_DEPLOY_HOOK }}" -X POST
+            echo "Render deploy triggered."
+          else
+            echo "No RENDER_DEPLOY_HOOK secret set — skipping."
+          fi
