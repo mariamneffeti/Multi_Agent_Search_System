@@ -10,12 +10,31 @@ from langchain_core.messages import SystemMessage, HumanMessage
 from state import ResearchState
 from tools import get_search_tool, web_fetch
 
+try:
+    from langchain_core.rate_limiters import InMemoryRateLimiter
+    _rate_limiter = InMemoryRateLimiter(
+        requests_per_second=0.5,
+        check_every_n_seconds=0.1,
+        max_bucket_size=5
+    )
+except ImportError:
+    _rate_limiter = None
+
 # Shared Model Instances
 _llm = None
 def get_llm(model: str = "llama-3.3-70b-versatile") -> ChatGroq :
     global _llm
     if _llm is None :
-        _llm = ChatGroq(model=model,temperature =0, max_tokens = 4096)
+        kwargs = {
+            "model": model,
+            "temperature": 0,
+            "max_tokens": 4096,
+            "max_retries": 10
+        }
+        if _rate_limiter is not None:
+            kwargs["rate_limiter"] = _rate_limiter
+            
+        _llm = ChatGroq(**kwargs)
     return _llm
 
     # Orchestrator
