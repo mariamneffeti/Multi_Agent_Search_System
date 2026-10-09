@@ -1,118 +1,147 @@
 # Multi-Agent Research System
 
-A LangGraph-based research pipeline that decomposes complex questions,
-dispatches specialist agents, and synthesizes a structured final report.
+A LangGraph research pipeline that fans out web research, critiques its analysis, and streams a cited report over FastAPI.
+
+[![CI](https://github.com/mariamneffeti/Multi_Agent_Search_System/actions/workflows/ci.yml/badge.svg)](https://github.com/mariamneffeti/Multi_Agent_Search_System/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)
+![Docker](https://img.shields.io/badge/Docker-supported-2496ED)
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+
+## Demo
+
+<!-- Add a demo recording at docs/demo.gif. -->
+
+![Demo recording placeholder](docs/demo.gif)
+
+## Screenshots
+
+<!-- Add screenshots when available. -->
+
+| Research in progress | Final report |
+| --- | --- |
+| ![Research UI placeholder](docs/screenshots/research.png) | ![Report placeholder](docs/screenshots/report.png) |
+
+## Features
+
+- Orchestrator breaks a query into focused, searchable subtasks.
+- Parallel research mode dispatches one research worker per subtask with LangGraph `Send()`.
+- Analysis organizes findings and evidence; a critique agent identifies gaps and unsupported claims.
+- Synthesizer produces a structured report with references and limitations.
+- FastAPI streams progress and the final report to clients using Server-Sent Events.
+- LangGraph supports `interrupt_before` and checkpointed thread state when a checkpointer is configured; see [Human review](#human-review).
+- A shared LangChain rate limiter controls model request pace.
 
 ## Architecture
 
-```
-User Query
-    │
-    ▼
-Orchestrator          Decomposes query into 3-5 subtasks
-    │
-    ▼
-Research Agent(s)     Web search + page fetch (parallel via Send API)
-    │
-    ▼
-Analysis Agent        Synthesizes evidence, maps tradeoffs
-    │
-    ▼
-Critique Agent        Flags bias, gaps, unsupported claims
-    │
-    ▼
-Synthesizer           Writes final structured report with citations
+```mermaid
+flowchart LR
+    U[User Query] --> O[Orchestrator]
+    O --> R[Parallel Research Agents]
+    R --> A[Analysis]
+    A --> C[Critique]
+    C --> S[Synthesis]
+    S --> P[Report]
 ```
 
-## Setup
+## Stack
 
-### 1. Install dependencies
+Python 3.11, LangGraph, LangChain, FastAPI, Docker, Groq (Llama 3.3) for language model calls, and Tavily for web search.
 
-```bash
-pip install -r requirements.txt
-```
+## Quickstart
 
-You also need `beautifulsoup4` for `web_fetch`:
-
-```bash
-pip install beautifulsoup4
-```
-
-### 2. Set API keys
+### Docker
 
 ```bash
 cp .env.example .env
-# Edit .env and fill in:
-#   GROQ_API_KEY=...
-#   TAVILY_API_KEY=...      (get a free key at tavily.com)
+# Set GROQ_API_KEY and TAVILY_API_KEY in .env
+docker compose up --build
 ```
 
-### 3. Run
+Open `http://localhost:8000`. The service listens on port 8000.
+
+### Manual
 
 ```bash
-# Default query
-python main.py
-
-# Custom query
-python main.py "What are the geopolitical risks in semiconductor supply chains?"
-
-# Parallel mode (faster — one research agent per subtask)
-python main.py "Impact of GLP-1 drugs on obesity treatment" --parallel
-
-# Save report to file
-python main.py "AI impact on software jobs" --output report.md
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env       # Add your keys to .env
+uvicorn api:app --reload --port 8000
 ```
 
-## Files
+For a command-line report, run `python main.py "Your research question" --parallel`.
 
-| File | Purpose |
-|------|---------|
-| `state.py` | Typed `ResearchState` Pydantic model — shared across all agents |
-| `tools.py` | Tool definitions: `web_search`, `web_fetch`, `summarize_text` |
-| `agents.py` | 5 agent functions: orchestrator, research, analysis, critique, synthesizer |
-| `graph.py` | Sequential LangGraph StateGraph |
-| `parallel_graph.py` | Parallel variant using `Send()` API for concurrent research |
-| `main.py` | CLI entry point |
+## API
 
-## Customisation
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/` | Serves the research interface. |
+| `GET` | `/history` | Serves the history page. |
+| `GET` | `/about` | Serves the about page. |
+| `GET` | `/api/health` | Reports service status and whether provider keys are configured. |
+| `POST` | `/research` | Starts research and streams status, then a `done` event with report, flags, citations, and subtasks. Body: `{"query":"...","parallel":true}`. |
 
-### Swap the LLM
+## Configuration
 
-In `agents.py`, change the model string in `get_llm()`:
+Copy `.env.example` to `.env` and provide:
 
-```python
-def get_llm(model: str = "llama-3.3-70b-versatile") -> ChatGroq:
-```
+| Variable | Purpose |
+| --- | --- |
+| `GROQ_API_KEY` | Groq chat model access. |
+| `TAVILY_API_KEY` | Tavily web search access. |
 
-Use `llama-3.3-70b-versatile` for cheaper/faster runs, `llama-3.3-70b-versatile` for highest quality.
+Keep `.env` local; it is ignored by Git.
 
-### Add tools
+## Testing
 
-In `tools.py`, decorate any function with `@tool` and import it into
-the relevant agent in `agents.py`.
+Install the project dependencies and pytest, then run `pytest`. GitHub Actions runs the test suite on pushes and pull requests.
 
-### Add a new agent node
+## Project structure
 
-1. Write the function in `agents.py` — takes `ResearchState`, returns `dict`
-2. Register it in `graph.py` with `workflow.add_node("name", fn)`
-3. Wire it with `workflow.add_edge()`
+| Path | Responsibility |
+| --- | --- |
+| `api.py` | FastAPI routes and SSE research endpoint. |
+| `agents.py` | Orchestrator, research, analysis, critique, and synthesis nodes. |
+| `state.py` | Shared Pydantic graph state and list reducers. |
+| `graph.py` | Sequential LangGraph workflow. |
+| `parallel_graph.py` | Parallel research workflow using `Send()`. |
+| `tools.py` | Tavily search and HTTP page fetch tools. |
+| `main.py` | Command-line entry point. |
+| `static/` | HTML pages served by the API. |
+| `tests/` | Automated tests with mocked external calls. |
+| `.github/workflows/` | CI and deployment workflows. |
 
-### Enable human-in-the-loop
+## Key technical decisions
 
-LangGraph supports interrupt points. Add before any node:
+- **LangGraph** models the pipeline as explicit stateful nodes and edges, which makes execution and checkpointing inspectable.
+- **`Send()` and `operator.add` reducers** fan out one research task per worker and merge each worker's research results and sources into shared state.
+- **`interrupt_before`** provides a review point before synthesis. The application can resume a checkpoint after a person approves or edits state.
+- **Rate limiting** spaces shared Groq model requests to reduce bursts against provider limits. The current limiter is in-memory and process-local.
 
-```python
-workflow.add_node("human_review", lambda s: s)  # passthrough
-workflow.interrupt_before(["synthesizer"])
-```
+### Human review
 
-Then resume with `graph.invoke(state, config={"configurable": {"thread_id": "1"}})`.
+The graph definitions can be compiled with `interrupt_before=["synthesizer"]` and a LangGraph checkpointer. Invoke with a stable `thread_id`, inspect or update the checkpointed state, then resume the same thread. The default API and CLI do not enable review or persistent storage; choose and configure a durable checkpointer before relying on state across restarts.
 
-## Notes
+## Results
 
-- `research_results` and `raw_sources` use `operator.add` — they accumulate
-  across parallel agent invocations without overwriting each other.
-- The critique agent does not block synthesis — its flags are passed as context,
-  not as a hard gate. Add a conditional edge if you want blocking critique.
-- Tavily's free tier gives 1,000 searches/month. For higher volume, consider
-  SerpAPI or Exa as drop-in replacements in `tools.py`.
+Example query: **[add query]**  
+Report: **[add report link or excerpt]**  
+Tokens: **[add measured input/output tokens]** · Latency: **[add measured duration]**
+
+## Roadmap
+
+- Add representative demo media and measured end-to-end results.
+- Add durable checkpoint configuration for long-running, reviewable research threads.
+- Improve observability for agent steps, provider latency, and token usage.
+
+## Deployment
+
+The repository's deployment is currently inactive. To reactivate automated Render deployment, configure a `RENDER_DEPLOY_HOOK` GitHub Actions secret, confirm the Render service and environment variables (`GROQ_API_KEY`, `TAVILY_API_KEY`) are configured, then push to `main`. The workflow builds and publishes the container to GHCR before calling the Render hook. The deploy hook alone does not create or configure a Render service.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
+
+## Contact
+
+Open an issue in this repository for questions or suggestions.
