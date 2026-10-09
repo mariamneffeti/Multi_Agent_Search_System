@@ -136,7 +136,7 @@ Tokens: **[add measured input/output tokens]** · Latency: **[add measured durat
 
 ## Deployment
 
-The repository's deployment is currently inactive. To reactivate automated Render deployment, configure a `RENDER_DEPLOY_HOOK` GitHub Actions secret, confirm the Render service and environment variables (`GROQ_API_KEY`, `TAVILY_API_KEY`) are configured, then push to `main`. The workflow builds and publishes the container to GHCR before calling the Render hook. The deploy hook alone does not create or configure a Render service.
+The repository's Render deployment is currently inactive. To reactivate it, create or select the Render service, configure `GROQ_API_KEY` and `TAVILY_API_KEY` in that service, add its deploy hook URL as the GitHub Actions secret `RENDER_DEPLOY_HOOK`, and push to `main`. The existing workflow builds and publishes the container to GHCR, then calls the hook when the secret is present. Confirm the service's image and port settings in Render before relying on automated deploys; the hook does not create or configure the service.
 
 ## License
 
