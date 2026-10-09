@@ -94,7 +94,7 @@ Keep `.env` local; it is ignored by Git.
 
 ## Testing
 
-Install the project dependencies and pytest, then run `pytest`. GitHub Actions runs the test suite on pushes and pull requests.
+Install the development dependencies with `pip install -r requirements-dev.txt`, then run `pytest`. GitHub Actions runs the test suite on pushes and pull requests.
 
 ## Project structure
 

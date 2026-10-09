@@ -13,6 +13,7 @@ Flow:
                             END
 """
 from langgraph.graph import StateGraph, END
+from typing import Any
 from state import ResearchState
 from agents import(
     orchestrator,
@@ -21,7 +22,7 @@ from agents import(
     critique_agent,
     synthesizer,
 )
-def build_graph() -> StateGraph:
+def build_graph(*, checkpointer: Any = None, interrupt_before: list[str] | None = None) -> StateGraph:
     workflow = StateGraph(ResearchState)
     # Register Nodes
     workflow.add_node("orchestrator",orchestrator)
@@ -36,7 +37,7 @@ def build_graph() -> StateGraph:
     workflow.add_edge("analysis",     "critique")
     workflow.add_edge("critique",     "synthesizer")
     workflow.add_edge("synthesizer",  END)
-    return workflow.compile()
+    return workflow.compile(checkpointer=checkpointer, interrupt_before=interrupt_before)
 
 # Compile once at import time for reuse
 research_graph = build_graph()
