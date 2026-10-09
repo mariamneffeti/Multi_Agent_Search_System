@@ -1,0 +1,4 @@
+*.html linguist-detectable=false
+static/** linguist-vendored
+*.json linguist-language=JSON
+*.ipynb linguist-detectable=false
