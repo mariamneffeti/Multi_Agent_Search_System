@@ -6,20 +6,15 @@ A LangGraph research pipeline that fans out web research, critiques its analysis
 ![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB)
 ![Docker](https://img.shields.io/badge/Docker-supported-2496ED)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+[![Live Demo](https://img.shields.io/badge/demo-live-2EA44F)](https://multi-agent-search-system.onrender.com)
 
-## Demo
+## Live Interactive Demo
 
-<!-- Add a demo recording at docs/demo.gif. -->
+Try the interactive research agent live in production:
 
-![Demo recording placeholder](docs/demo.gif)
+🔗 **[Open Nexus Research Live Demo](https://multi-agent-search-system.onrender.com)**
 
-## Screenshots
-
-<!-- Add screenshots when available. -->
-
-| Research in progress | Final report |
-| --- | --- |
-| ![Research UI placeholder](docs/screenshots/research.png) | ![Report placeholder](docs/screenshots/report.png) |
+*Decomposes queries into subtasks, conducts parallel Tavily web searches, and streams synthesis and critique via Server-Sent Events (SSE).*
 
 ## Features
 
@@ -122,11 +117,12 @@ Install the development dependencies with `pip install -r requirements-dev.txt`,
 
 The graph definitions can be compiled with `interrupt_before=["synthesizer"]` and a LangGraph checkpointer. Invoke with a stable `thread_id`, inspect or update the checkpointed state, then resume the same thread. The default API and CLI do not enable review or persistent storage; choose and configure a durable checkpointer before relying on state across restarts.
 
-## Results
+## Core Pipeline Capabilities
 
-Example query: **[add query]**  
-Report: **[add report link or excerpt]**  
-Tokens: **[add measured input/output tokens]** · Latency: **[add measured duration]**
+- **Subtask Decomposition:** Breaks complex multi-hop research topics into discrete, focused queries.
+- **Concurrent Retrieval:** Dispatches parallel research workers via LangGraph Send() with operator.add accumulation.
+- **Critical Synthesis:** Dedicated critique agent audits findings for bias, coverage gaps, and unsupported assertions before final synthesis.
+- **Streaming Output:** Streams live research progress and cited markdown reports over FastAPI Server-Sent Events.
 
 ## Roadmap
 
@@ -144,4 +140,6 @@ MIT. See [LICENSE](LICENSE).
 
 ## Contact
 
-Open an issue in this repository for questions or suggestions.
+**Meriem Neffeti**  
+AI Automation Engineer  
+Email: [neffetimeriem@gmail.com](mailto:neffetimeriem@gmail.com) · [LinkedIn](https://www.linkedin.com/in/meriem-neffeti-8a488a385/) · [GitHub](https://github.com/mariamneffeti)
